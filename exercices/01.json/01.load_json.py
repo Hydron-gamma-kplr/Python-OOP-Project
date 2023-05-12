@@ -1,4 +1,4 @@
-# Import des modules nécessaires
+# Import modules nécessaires
 import json
 from unidecode import unidecode
 import re

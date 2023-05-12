@@ -1,5 +1,6 @@
 # Import des modules nécessaires
 import json
+import os
 from unidecode import unidecode
 import re
 
@@ -22,34 +23,49 @@ La méthode generate_class_hierarchy permet de générer une hiérarchie des cla
 Elle prend les arguments suivant: 
     - json_dict : un dictionnaire Python représentant une hiérarchie des classes.
     - superclass_name : une chaîne de caractères représentant le nom de la classe parente. Par défaut, sa valeur est None pour la racine de la hiérarchie.
-    - superclass_args : une liste des arguments des arguments de la classe mère à passer à la classe fille.
+    - superclass_args : une liste des arguments de la classe mère à passer à la classe fille.
 """
 def generate_class_hierarchy(json_dict :dict, superclass_name:str=None,superclass_args:list=[]):
-    # Initialisation de la chaîne de caractères contenant les définitions de classes
+
+# Initialisation de la chaîne de caractères contenant les définitions de classes
+
     class_defs = ""
+    super_attr = []
+     
+# Itération sur les éléments du dictionnaire pour chaque nom de classe (class_name) et attribut de cette dernière (class_attrs) dans les éléments de  json_dict, faire:
 
-    """ 
-    Itération sur les éléments du dictionnaire
-    pour chaque nom de classe (class_name) et attribut de cette dernière (class_attrs) dans les éléments de  json_dict, faire:
+    for class_name, class_attrs in json_dict.items():
 
-        - Générer la définition de la classe avec la méthode generate_class_def() en passant les arguments superclass_name et superclass_args comme entrées
-        - le résultat de la méthode generate_class_def() est stocker dans une variable 'class_def'
-        - Concaténer la définition de la classe à la chaîne de caractères class_defs
-  
-        - Ensuite, vérifier la présence des sous-classes dans la classe courante
-        - Si "subclasses" existe parmi les attributs de la classe courante, faire:
-                -Construire une liste "super_attr" contenant les attributs de la classe courante concaténées aux arguments de la superclasse
-                -Puis, supprimer l'attribut 'subclasses' à partir de la liste créée
+# Suppression des espaces dans le nom des classes
 
-                - Ensuite, faire une récursion pour générer la définition de la sous-classe en utilisant la méthode generate_class_hierarchy
-                - En passant le nom de la classe courante en tant que superclass_name et la liste super_attr en tant que superclass_args
-                - Concaténer la définition de la sous-classe à la chaîne de caractères class_defs
+        class_name = class_name.replace(" ","_").replace("-","_")
 
-    
-    Retourne la chaîne de caractères contenant les définitions de classes
-    
-    """
-   
+# Générer la définition de la classe avec la méthode generate_class_def() en passant les arguments superclass_name et superclass_args comme entrées
+# le résultat de la méthode generate_class_def() est stocker dans une variable 'class_def'
+# Concaténer la définition de la classe à la chaîne de caractères class_defs
+
+        class_defs += generate_class_def_(class_name, class_attrs, superclasse_name, superclass_args)
+
+# Ensuite, vérifier la présence des sous-classes dans la classe courante
+# Si "subclasses" existe parmi les attributs de la classe courante, faire:
+# Construire une liste "super_attr" contenant les attributs de la classe courante concaténées aux arguments de la superclasse
+# Puis, supprimer l'attribut 'subclasses' à partir de la liste créée
+
+        if "subclasses" in class_attrs:
+             super_attr = list(class_attrs.keys()) + superclass_args
+             for nom_attribut in class_attrs.keys():
+                  if (nom_attribut != "subclasses"): 
+                       super_attr.append(nom_attribut)
+
+# Ensuite, faire une récursion pour générer la définition de la sous-classe en utilisant la méthode generate_class_hierarchy
+# En passant le nom de la classe courante en tant que superclass_name et la liste super_attr en tant que superclass_args
+# Concaténer la définition de la sous-classe à la chaîne de caractères class_defs
+
+        class_defs += generate_class_hierarchy(class_attrs["subclasses"], class_name, super_attr)
+
+# Retourne la chaîne de caractères contenant les définitions de classes
+
+    return class_defs   
  
 # la méthode write_content va nous permet d'écrire le code généré automatiquement des classes dans un fichier Python séparé
 """

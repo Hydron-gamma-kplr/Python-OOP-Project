@@ -100,6 +100,6 @@ Table(350,700,"TEX","Verre","Transparent",120,60,75)]
 
 # Parcours du mobilier
 
-for meuble in mobilier:
-    print(meuble)
-main()
+#for meuble in mobilier:
+    #print(meuble)
+#main()
